@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  assets      Asset[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Asset {
+  id           String        @id @default(cuid())
+  code         String        @unique
+  name         String
+  status       AssetStatus   @default(ACTIVE)
+  serial       String?
+  purchaseDate DateTime?
+  location     String
+  owner        String
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  maintenance  Maintenance[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Maintenance {
+  id          String             @id @default(cuid())
+  assetId     String
+  asset       Asset              @relation(fields: [assetId], references: [id])
+  type        MaintenanceType
+  status      MaintenanceStatus  @default(PENDING)
+  scheduledAt DateTime
+  completedAt DateTime?
+  notes       String?
+  createdAt   DateTime           @default(now())
+}
+
+enum AssetStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  WARRANTY
+}
+
+enum MaintenanceStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
