@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Category {
@@ -20,7 +21,7 @@ model Asset {
   id           String        @id @default(cuid())
   code         String        @unique
   name         String
-  status       AssetStatus   @default(ACTIVE)
+  status String @default("ACTIVE")
   serial       String?
   purchaseDate DateTime?
   location     String
@@ -36,28 +37,17 @@ model Maintenance {
   id          String             @id @default(cuid())
   assetId     String
   asset       Asset              @relation(fields: [assetId], references: [id])
-  type        MaintenanceType
-  status      MaintenanceStatus  @default(PENDING)
+  type String
+  status String @default("PENDING")
   scheduledAt DateTime
   completedAt DateTime?
   notes       String?
   createdAt   DateTime           @default(now())
 }
 
-enum AssetStatus {
-  ACTIVE
-  MAINTENANCE
-  RETIRED
-}
 
-enum MaintenanceType {
-  PREVENTIVE
-  CORRECTIVE
-  WARRANTY
-}
 
-enum MaintenanceStatus {
-  PENDING
-  IN_PROGRESS
-  DONE
-}
+
+
+
+
