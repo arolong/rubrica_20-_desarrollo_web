@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import TopNav from "../components/TopNav";
 
 const stats = [
@@ -57,6 +61,25 @@ const activities = [
 ];
 
 export default function DashboardPage() {
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+  const filteredAssets = statusFilter
+    ? assets.filter((a) => a.status === statusFilter)
+    : assets;
+
+  const downloadCSV = () => {
+    const csv =
+      "Codigo,Activo,Tipo,Estado,Area,Actualizacion\n" +
+      filteredAssets
+        .map((a) => `${a.code},${a.name},${a.type},${a.status},${a.area},${a.updated}`)
+        .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "activos.csv";
+    link.click();
+  };
   return (
     <div className="min-h-full bg-[#f5f4ef]">
       <div className="relative overflow-hidden">
@@ -74,12 +97,12 @@ export default function DashboardPage() {
             </h2>
           </div>
           <div className="hidden items-center gap-3 sm:flex">
-            <button className="rounded-full border border-black/10 px-5 py-2 text-sm font-medium text-[#2a2a2a] transition hover:border-black/30">
+            <button disabled title="Reportes en desarrollo" className="rounded-full border border-black/10 px-5 py-2 text-sm font-medium text-[#999] cursor-not-allowed transition">
               Ver reportes
             </button>
-            <button className="rounded-full bg-[#2f6b62] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#25564f]">
+            <Link href="/activos" className="inline-block rounded-full bg-[#2f6b62] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#25564f]">
               Nuevo activo
-            </button>
+            </Link>
           </div>
         </header>
 
@@ -117,10 +140,21 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3c3c3c]">
-                Filtrar
-              </button>
-              <button className="rounded-full bg-[#f0c778] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#151515]">
+              <select 
+                value={statusFilter || ""}
+                onChange={(e) => setStatusFilter(e.target.value || null)}
+                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3c3c3c] bg-white cursor-pointer transition hover:border-black/30"
+              >
+                <option value="">Todos los estados</option>
+                <option value="Operativo">Operativo</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+                <option value="Baja">Baja</option>
+              </select>
+              <button
+                onClick={downloadCSV}
+                className="rounded-full bg-[#f0c778] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#151515] transition hover:bg-[#e8bb66]"
+                title="Descargar CSV"
+              >
                 Exportar
               </button>
             </div>
@@ -138,7 +172,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {assets.map((asset) => (
+                {filteredAssets.map((asset) => (
                   <tr key={asset.code} className="hover:bg-[#fbfaf7]">
                     <td className="px-4 py-4 font-semibold text-[#2a2a2a]">
                       {asset.code}

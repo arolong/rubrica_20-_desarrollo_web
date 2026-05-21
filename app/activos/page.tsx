@@ -19,6 +19,7 @@ export default function ActivosPage() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [form, setForm] = useState({ code: "", name: "", location: "", owner: "", categoryId: "" });
 
   useEffect(() => {
@@ -50,6 +51,24 @@ export default function ActivosPage() {
     }
   }
 
+  const filteredAssets = categoryFilter
+    ? assets.filter((a) => a.category?.id === categoryFilter)
+    : assets;
+
+  const downloadCSV = () => {
+    const csv =
+      "Codigo,Nombre,Categoria,Estado,Ubicacion,Responsable\n" +
+      filteredAssets
+        .map((a) => `${a.code || a.id},"${a.name}",${a.category?.name || '-'},${a.status || '-'},${a.location || '-'},${a.owner || '-'}`)
+        .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "activos.csv";
+    link.click();
+  };
+
   return (
     <div className="min-h-full bg-[#f5f4ef]">
       <TopNav />
@@ -62,7 +81,25 @@ export default function ActivosPage() {
               <p className="mt-2 text-sm text-[#6f6f6f]">Gestiona estado, ubicacion y responsables por activo.</p>
             </div>
             <div className="flex gap-2">
-              <button className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3c3c3c]">Filtrar</button>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3c3c3c] bg-white cursor-pointer transition hover:border-black/30"
+              >
+                <option value="">Todas las categorias</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={downloadCSV}
+                className="rounded-full bg-[#f0c778] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#151515] transition hover:bg-[#e8bb66]"
+                title="Descargar CSV"
+              >
+                Exportar
+              </button>
               <button onClick={() => setShowForm(true)} className="rounded-full bg-[#2f6b62] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">Nuevo activo</button>
             </div>
           </div>
@@ -103,10 +140,10 @@ export default function ActivosPage() {
               <tbody className="divide-y divide-black/5">
                 {loading ? (
                   <tr><td colSpan={6} className="px-4 py-6">Cargando...</td></tr>
-                ) : assets.length === 0 ? (
+                ) : filteredAssets.length === 0 ? (
                   <tr><td colSpan={6} className="px-4 py-6">No hay activos.</td></tr>
                 ) : (
-                  assets.map((asset) => (
+                  filteredAssets.map((asset) => (
                     <tr key={asset.id} className="hover:bg-[#fbfaf7]">
                       <td className="px-4 py-4 font-semibold text-[#2a2a2a]"><Link href={`/activos/${asset.id}`} className="text-[#2f6b62]">{asset.code ?? asset.id}</Link></td>
                       <td className="px-4 py-4 text-[#1f1f1f]">{asset.name}</td>
