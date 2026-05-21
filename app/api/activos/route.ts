@@ -8,6 +8,7 @@ export async function GET() {
     const assets = await prisma.asset.findMany({ include: { category: true } });
     return NextResponse.json(assets);
   } catch (err) {
+    console.error('GET /api/activos error:', err);
     return NextResponse.json({ error: 'Failed to fetch assets' }, { status: 500 });
   }
 }
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(asset, { status: 201 });
   } catch (err) {
+    console.error('POST /api/activos error:', err);
     return NextResponse.json({ error: 'Failed to create asset' }, { status: 500 });
   }
 }

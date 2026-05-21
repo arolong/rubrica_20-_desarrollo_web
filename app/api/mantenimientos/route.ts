@@ -8,6 +8,7 @@ export async function GET() {
     const items = await prisma.maintenance.findMany({ include: { asset: true }, orderBy: { scheduledAt: 'desc' } });
     return NextResponse.json(items);
   } catch (err) {
+    console.error('GET /api/mantenimientos error:', err);
     return NextResponse.json({ error: 'Failed to fetch maintenances' }, { status: 500 });
   }
 }
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(maint, { status: 201 });
   } catch (err) {
+    console.error('POST /api/mantenimientos error:', err);
     return NextResponse.json({ error: 'Failed to create maintenance' }, { status: 500 });
   }
 }

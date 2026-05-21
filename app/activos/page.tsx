@@ -47,7 +47,14 @@ export default function ActivosPage() {
       setShowForm(false);
       fetchAssets();
     } else {
-      alert('Error creating asset');
+      let msg = 'Error creating asset';
+      try {
+        const body = await res.json();
+        if (body?.error) msg = body.error;
+      } catch (e) {
+        // ignore
+      }
+      alert(msg);
     }
   }
 
