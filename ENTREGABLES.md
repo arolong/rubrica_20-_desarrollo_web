@@ -83,6 +83,14 @@ export default function TopNav() {
 
 				Documento actualizado en el repo con el estado del MVP y pasos siguientes.
 
+				## Cambios recientes
+
+				- Correcciones del build: se eliminaron exports duplicados en `app/categorias/page.tsx` y `app/mantenimientos/page.tsx`.
+				- Ajustes en las rutas API: firmas normalizadas en `app/api/*/[id]/route.ts` para resolver diferencias de tipos de `params` en versiones recientes de Next.js.
+				- Commit y push: `561702dbfbb4f3c0241fa01550cdd637d0196725` (rama `main`) — cambios subidos al remoto.
+				- Estado del build: `npm run build:prod` pasa localmente después de los arreglos.
+				- Pendiente (urgente): rotar credenciales de Neon y configurar `DATABASE_URL` en Netlify (no incluir credenciales en el repo).
+
 					</Link>
 				))}
 			</div>
