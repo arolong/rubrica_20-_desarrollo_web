@@ -61,6 +61,28 @@ export default function TopNav() {
 						className="rounded-full border border-black/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#3c3c3c] transition hover:border-black/30"
 					>
 						{link.label}
+
+				## Estado actual del entregable (MVP)
+
+				- Base de datos: migrada a Neon (Postgres). `prisma/schema.postgres.prisma` y `prisma/seed.js` incluidos.
+				- APIs implementadas: `activos`, `categorias`, `mantenimientos` (GET/POST y endpoints por id: GET/PUT/DELETE).
+				- UI implementada: listados y formularios para `activos`, `categorias` y `mantenimientos`.
+				- Detalle de activo: muestra datos reales desde la BD y permite editar/eliminar desde la UI (`EditAssetForm`).
+				- Scripts y config de despliegue: `netlify.toml`, `README_DEPLOY.md`, `build:prod` en `package.json`.
+				- Seed/migraciones: `npm run seed:neon` disponible para poblar Neon desde `dev.db`.
+
+				## Pendientes antes de producción
+
+				- Rotar credenciales de Neon (urgente) y configurar `DATABASE_URL` en Netlify.
+				- Completar pruebas automatizadas y linters; agregar CI si se desea.
+				- Pulir navegación y estilos (`TopNav`) y validaciones UI adicionales.
+				- Configurar observabilidad y backups para Neon.
+				- Hacer commit final y push al repositorio remoto y activar deploy en Netlify.
+
+				---
+
+				Documento actualizado en el repo con el estado del MVP y pasos siguientes.
+
 					</Link>
 				))}
 			</div>
