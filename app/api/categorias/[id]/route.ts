@@ -3,8 +3,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     const cat = await prisma.category.findUnique({ where: { id: params.id } });
     if (!cat) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(cat);
@@ -13,8 +14,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     const body = await request.json();
     const updates: any = {};
     if ('name' in body) updates.name = body.name;
@@ -26,11 +28,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     await prisma.category.delete({ where: { id: params.id } });
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 });
   }
 }
+

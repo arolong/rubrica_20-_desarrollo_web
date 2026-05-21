@@ -1,12 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+type Params = { id: string };
+
+export async function GET(_request: NextRequest, { params }: { params: Promise<Params> }) {
   try {
+    const { id } = await params;
     const asset = await prisma.asset.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { category: true, maintenance: true },
     });
     if (!asset) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -16,8 +19,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<Params> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const updates: any = {};
     const updatable = ['code', 'name', 'status', 'serial', 'purchaseDate', 'location', 'owner', 'categoryId'];
@@ -26,18 +30,20 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (updates.purchaseDate) updates.purchaseDate = new Date(updates.purchaseDate);
 
-    const asset = await prisma.asset.update({ where: { id: params.id }, data: updates });
+    const asset = await prisma.asset.update({ where: { id }, data: updates });
     return NextResponse.json(asset);
   } catch (err) {
     return NextResponse.json({ error: 'Failed to update asset' }, { status: 500 });
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<Params> }) {
   try {
-    await prisma.asset.delete({ where: { id: params.id } });
+    const { id } = await params;
+    await prisma.asset.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to delete asset' }, { status: 500 });
   }
 }
+

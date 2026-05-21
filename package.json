@@ -28,6 +28,6 @@
     "sqlite3": "^5.1.6",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "sqlite3": "^5.1.6",
     "@netlify/plugin-nextjs": "^5.0.0"
+  }
 }

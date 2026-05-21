@@ -3,8 +3,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     const m = await prisma.maintenance.findUnique({ where: { id: params.id }, include: { asset: true } });
     if (!m) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     return NextResponse.json(m);
@@ -13,8 +14,9 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     const body = await request.json();
     const updates: any = {};
     const allowed = ['status', 'type', 'scheduledAt', 'completedAt', 'notes'];
@@ -24,7 +26,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const m = await prisma.maintenance.update({ where: { id: params.id }, data: updates });
 
-    // if marked DONE, set asset status to ACTIVE
     if (updates.status === 'DONE') {
       await prisma.asset.update({ where: { id: m.assetId }, data: { status: 'ACTIVE' } });
     }
@@ -35,11 +36,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, context: any) {
   try {
+    const params = await Promise.resolve(context.params);
     await prisma.maintenance.delete({ where: { id: params.id } });
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to delete maintenance' }, { status: 500 });
   }
 }
+
