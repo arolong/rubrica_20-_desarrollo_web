@@ -62,6 +62,7 @@ const activities = [
 
 export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [maintenanceForm, setMaintenanceForm] = useState({ assetCode: "", responsible: "", type: "", notes: "" });
 
   const filteredAssets = statusFilter
     ? assets.filter((a) => a.status === statusFilter)
@@ -79,6 +80,30 @@ export default function DashboardPage() {
     link.href = url;
     link.download = "activos.csv";
     link.click();
+  };
+
+  const handleMaintenanceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!maintenanceForm.assetCode || !maintenanceForm.type) {
+      alert("Código y tipo requeridos");
+      return;
+    }
+    const res = await fetch("/api/mantenimientos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        assetId: maintenanceForm.assetCode,
+        type: maintenanceForm.type,
+        scheduledAt: new Date().toISOString(),
+        notes: maintenanceForm.notes,
+      }),
+    });
+    if (res.ok) {
+      setMaintenanceForm({ assetCode: "", responsible: "", type: "", notes: "" });
+      alert("Mantenimiento registrado");
+    } else {
+      alert("Error registrando mantenimiento");
+    }
   };
   return (
     <div className="min-h-full bg-[#f5f4ef]">
@@ -209,22 +234,39 @@ export default function DashboardPage() {
             <p className="mt-2 text-sm text-[#6f6f6f]">
               Registra tareas en menos de 2 minutos.
             </p>
-            <form className="mt-5 grid gap-4">
+            <form onSubmit={handleMaintenanceSubmit} className="mt-5 grid gap-4">
               <input
+                required
+                value={maintenanceForm.assetCode}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, assetCode: e.target.value })}
                 className="h-11 rounded-xl border border-black/10 px-4 text-sm outline-none transition focus:border-[#2f6b62]"
                 placeholder="Codigo del activo"
               />
               <input
+                value={maintenanceForm.responsible}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, responsible: e.target.value })}
                 className="h-11 rounded-xl border border-black/10 px-4 text-sm outline-none transition focus:border-[#2f6b62]"
                 placeholder="Responsable"
               />
-              <select className="h-11 rounded-xl border border-black/10 px-4 text-sm text-[#5f5f5f] outline-none transition focus:border-[#2f6b62]">
-                <option>Tipo de mantenimiento</option>
-                <option>Preventivo</option>
-                <option>Correctivo</option>
-                <option>Garantia</option>
+              <select
+                required
+                value={maintenanceForm.type}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, type: e.target.value })}
+                className="h-11 rounded-xl border border-black/10 px-4 text-sm text-[#5f5f5f] outline-none transition focus:border-[#2f6b62]"
+              >
+                <option value="">Tipo de mantenimiento</option>
+                <option value="PREVENTIVE">Preventivo</option>
+                <option value="CORRECTIVE">Correctivo</option>
+                <option value="WARRANTY">Garantia</option>
               </select>
-              <button className="h-11 rounded-xl bg-[#2f6b62] text-sm font-semibold text-white transition hover:bg-[#25564f]">
+              <textarea
+                value={maintenanceForm.notes}
+                onChange={(e) => setMaintenanceForm({ ...maintenanceForm, notes: e.target.value })}
+                className="rounded-xl border border-black/10 px-4 py-2 text-sm outline-none transition focus:border-[#2f6b62]"
+                placeholder="Notas (opcional)"
+                rows={2}
+              />
+              <button type="submit" className="h-11 rounded-xl bg-[#2f6b62] text-sm font-semibold text-white transition hover:bg-[#25564f]">
                 Registrar
               </button>
             </form>
@@ -235,9 +277,9 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold text-[#1f1f1f]">
                 Actividad reciente
               </h3>
-              <button className="text-xs font-semibold uppercase tracking-[0.2em] text-[#2f6b62]">
+              <Link href="/mantenimientos" className="text-xs font-semibold uppercase tracking-[0.2em] text-[#2f6b62] transition hover:text-[#25564f]">
                 Ver todo
-              </button>
+              </Link>
             </div>
             <div className="mt-4 space-y-4">
               {activities.map((item) => (
